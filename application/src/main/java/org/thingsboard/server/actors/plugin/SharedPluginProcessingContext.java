@@ -18,13 +18,13 @@ package org.thingsboard.server.actors.plugin;
 import akka.actor.ActorRef;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.actors.ActorSystemContext;
-import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.EntityId;
+import org.thingsboard.server.common.data.id.PluginId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.msg.cluster.ServerAddress;
+import org.thingsboard.server.common.msg.rpc.ToDeviceRpcRequest;
+import org.thingsboard.server.common.msg.timeout.TimeoutMsg;
 import org.thingsboard.server.controller.plugin.PluginWebSocketMsgEndpoint;
-import org.thingsboard.server.common.data.id.PluginId;
 import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.audit.AuditLogService;
@@ -32,13 +32,11 @@ import org.thingsboard.server.dao.customer.CustomerService;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.plugin.PluginService;
 import org.thingsboard.server.dao.relation.RelationService;
+import org.thingsboard.server.dao.rule.RuleChainService;
 import org.thingsboard.server.dao.rule.RuleService;
 import org.thingsboard.server.dao.tenant.TenantService;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
 import org.thingsboard.server.extensions.api.device.DeviceAttributesEventNotificationMsg;
-import org.thingsboard.server.extensions.api.plugins.msg.TimeoutMsg;
-import org.thingsboard.server.extensions.api.plugins.msg.ToDeviceRpcRequest;
-import org.thingsboard.server.extensions.api.plugins.msg.ToDeviceRpcRequestPluginMsg;
 import org.thingsboard.server.service.cluster.routing.ClusterRoutingService;
 import org.thingsboard.server.service.cluster.rpc.ClusterRpcService;
 import scala.concurrent.duration.Duration;
@@ -56,6 +54,7 @@ public final class SharedPluginProcessingContext {
     final AssetService assetService;
     final DeviceService deviceService;
     final RuleService ruleService;
+    final RuleChainService ruleChainService;
     final PluginService pluginService;
     final CustomerService customerService;
     final TenantService tenantService;
@@ -84,6 +83,7 @@ public final class SharedPluginProcessingContext {
         this.rpcService = sysContext.getRpcService();
         this.routingService = sysContext.getRoutingService();
         this.ruleService = sysContext.getRuleService();
+        this.ruleChainService = sysContext.getRuleChainService();
         this.pluginService = sysContext.getPluginService();
         this.customerService = sysContext.getCustomerService();
         this.tenantService = sysContext.getTenantService();
@@ -105,8 +105,8 @@ public final class SharedPluginProcessingContext {
 
     public void sendRpcRequest(ToDeviceRpcRequest msg) {
         log.trace("[{}] Forwarding msg {} to device actor!", pluginId, msg);
-        ToDeviceRpcRequestPluginMsg rpcMsg = new ToDeviceRpcRequestPluginMsg(pluginId, tenantId, msg);
-        forward(msg.getDeviceId(), rpcMsg, rpcService::tell);
+//        ToDeviceRpcRequestPluginMsg rpcMsg = new ToDeviceRpcRequestPluginMsg(pluginId, tenantId, msg);
+//        forward(msg.getDeviceId(), rpcMsg, rpcService::tell);
     }
 
     private <T> void forward(DeviceId deviceId, T msg, BiConsumer<ServerAddress, T> rpcFunction) {

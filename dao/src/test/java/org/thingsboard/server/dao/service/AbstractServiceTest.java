@@ -39,6 +39,7 @@ import org.thingsboard.server.common.data.plugin.ComponentDescriptor;
 import org.thingsboard.server.common.data.plugin.ComponentScope;
 import org.thingsboard.server.common.data.plugin.ComponentType;
 import org.thingsboard.server.common.data.plugin.PluginMetaData;
+import org.thingsboard.server.common.data.rule.RuleChain;
 import org.thingsboard.server.common.data.rule.RuleMetaData;
 import org.thingsboard.server.dao.alarm.AlarmService;
 import org.thingsboard.server.dao.asset.AssetService;
@@ -52,6 +53,7 @@ import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.event.EventService;
 import org.thingsboard.server.dao.plugin.PluginService;
 import org.thingsboard.server.dao.relation.RelationService;
+import org.thingsboard.server.dao.rule.RuleChainService;
 import org.thingsboard.server.dao.rule.RuleService;
 import org.thingsboard.server.dao.settings.AdminSettingsService;
 import org.thingsboard.server.dao.tenant.TenantService;
@@ -124,6 +126,9 @@ public abstract class AbstractServiceTest {
 
     @Autowired
     protected AlarmService alarmService;
+
+    @Autowired
+    protected RuleChainService ruleChainService;
 
     @Autowired
     private ComponentDescriptorService componentDescriptorService;
@@ -212,10 +217,10 @@ public abstract class AbstractServiceTest {
         ruleMetaData.setWeight(weight);
         ruleMetaData.setPluginToken(pluginToken);
 
-        ruleMetaData.setAction(createNode(ComponentScope.TENANT, ComponentType.ACTION,
+        ruleMetaData.setAction(createNode(ComponentScope.TENANT, ComponentType.OLD_ACTION,
                 "org.thingsboard.component.ActionTest", "TestJsonDescriptor.json", "TestJsonData.json"));
-        ruleMetaData.setProcessor(createNode(ComponentScope.TENANT, ComponentType.PROCESSOR,
-                "org.thingsboard.component.ProcessorTest", "TestJsonDescriptor.json", "TestJsonData.json"));
+//        ruleMetaData.setProcessor(createNode(ComponentScope.TENANT, ComponentType.PROCESSOR,
+//                "org.thingsboard.component.ProcessorTest", "TestJsonDescriptor.json", "TestJsonData.json"));
         ruleMetaData.setFilters(mapper.createArrayNode().add(
                 createNode(ComponentScope.TENANT, ComponentType.FILTER,
                         "org.thingsboard.component.FilterTest", "TestJsonDescriptor.json", "TestJsonData.json")

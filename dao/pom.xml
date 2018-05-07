@@ -23,7 +23,6 @@
         <version>1.4.1-SNAPSHOT</version>
         <artifactId>thingsboard</artifactId>
     </parent>
-    <groupId>org.thingsboard</groupId>
     <artifactId>dao</artifactId>
     <packaging>jar</packaging>
 
@@ -39,7 +38,11 @@
         <dependency>
             <groupId>org.thingsboard.common</groupId>
             <artifactId>data</artifactId>
-        </dependency>    
+        </dependency>
+        <dependency>
+            <groupId>org.thingsboard.common</groupId>
+            <artifactId>message</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -140,6 +143,10 @@
                 </exclusion>
             </exclusions>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>

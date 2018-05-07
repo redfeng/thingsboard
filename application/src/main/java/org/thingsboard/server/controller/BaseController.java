@@ -15,12 +15,9 @@
  */
 package org.thingsboard.server.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,7 +27,6 @@ import org.thingsboard.server.common.data.alarm.Alarm;
 import org.thingsboard.server.common.data.alarm.AlarmId;
 import org.thingsboard.server.common.data.alarm.AlarmInfo;
 import org.thingsboard.server.common.data.asset.Asset;
-import org.thingsboard.server.common.data.audit.ActionStatus;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.page.TextPageLink;
@@ -38,6 +34,7 @@ import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.common.data.plugin.ComponentDescriptor;
 import org.thingsboard.server.common.data.plugin.ComponentType;
 import org.thingsboard.server.common.data.plugin.PluginMetaData;
+import org.thingsboard.server.common.data.rule.RuleChain;
 import org.thingsboard.server.common.data.rule.RuleMetaData;
 import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.widget.WidgetType;
@@ -48,27 +45,32 @@ import org.thingsboard.server.dao.audit.AuditLogService;
 import org.thingsboard.server.dao.customer.CustomerService;
 import org.thingsboard.server.dao.dashboard.DashboardService;
 import org.thingsboard.server.dao.device.DeviceCredentialsService;
+import org.thingsboard.server.dao.device.DeviceOfflineService;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.plugin.PluginService;
 import org.thingsboard.server.dao.relation.RelationService;
+import org.thingsboard.server.dao.rule.RuleChainService;
 import org.thingsboard.server.dao.rule.RuleService;
+import org.thingsboard.server.dao.tenant.TenantService;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.widget.WidgetTypeService;
 import org.thingsboard.server.dao.widget.WidgetsBundleService;
-import org.thingsboard.server.exception.ThingsboardErrorCode;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.exception.ThingsboardErrorResponseHandler;
-import org.thingsboard.server.exception.ThingsboardException;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.service.component.ComponentDiscoveryService;
 import org.thingsboard.server.service.security.model.SecurityUser;
+import org.thingsboard.server.service.state.DeviceStateService;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
@@ -81,6 +83,9 @@ public abstract class BaseController {
 
     @Autowired
     private ThingsboardErrorResponseHandler errorResponseHandler;
+
+    @Autowired
+    protected TenantService tenantService;
 
     @Autowired
     protected CustomerService customerService;
@@ -119,6 +124,9 @@ public abstract class BaseController {
     protected PluginService pluginService;
 
     @Autowired
+    protected RuleChainService ruleChainService;
+
+    @Autowired
     protected ActorService actorService;
 
     @Autowired
@@ -126,6 +134,12 @@ public abstract class BaseController {
 
     @Autowired
     protected AuditLogService auditLogService;
+
+    @Autowired
+    protected DeviceOfflineService offlineService;
+
+    @Autowired
+    protected DeviceStateService deviceStateService;
 
     @ExceptionHandler(ThingsboardException.class)
     public void handleThingsboardException(ThingsboardException ex, HttpServletResponse response) {
@@ -294,6 +308,9 @@ public abstract class BaseController {
                     return;
                 case RULE:
                     checkRule(new RuleId(entityId.getId()));
+                    return;
+                case RULE_CHAIN:
+                    checkRuleChain(new RuleChainId(entityId.getId()));
                     return;
                 case ASSET:
                     checkAsset(assetService.findAssetById(new AssetId(entityId.getId())));
@@ -472,6 +489,15 @@ public abstract class BaseController {
         }
     }
 
+    List<ComponentDescriptor> checkComponentDescriptorsByTypes(Set<ComponentType> types) throws ThingsboardException {
+        try {
+            log.debug("[{}] Lookup component descriptors", types);
+            return componentDescriptorService.getComponents(types);
+        } catch (Exception e) {
+            throw handleException(e, false);
+        }
+    }
+
     List<ComponentDescriptor> checkPluginActionsByPluginClazz(String pluginClazz) throws ThingsboardException {
         try {
             checkComponentDescriptorByClazz(pluginClazz);
@@ -526,6 +552,30 @@ public abstract class BaseController {
         return rule;
     }
 
+    protected RuleChain checkRuleChain(RuleChainId ruleChainId) throws ThingsboardException {
+        checkNotNull(ruleChainId);
+        return checkRuleChain(ruleChainService.findRuleChainById(ruleChainId));
+    }
+
+    protected RuleChain checkRuleChain(RuleChain ruleChain) throws ThingsboardException {
+        checkNotNull(ruleChain);
+        SecurityUser authUser = getCurrentUser();
+        TenantId tenantId = ruleChain.getTenantId();
+        validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
+        if (authUser.getAuthority() != Authority.SYS_ADMIN) {
+            if (authUser.getTenantId() == null ||
+                    !tenantId.getId().equals(ModelConstants.NULL_UUID) && !authUser.getTenantId().equals(tenantId)) {
+                throw new ThingsboardException(YOU_DON_T_HAVE_PERMISSION_TO_PERFORM_THIS_OPERATION,
+                        ThingsboardErrorCode.PERMISSION_DENIED);
+
+            } else if (tenantId.getId().equals(ModelConstants.NULL_UUID)) {
+                ruleChain.setConfiguration(null);
+            }
+        }
+        return ruleChain;
+    }
+
+
     protected String constructBaseUrl(HttpServletRequest request) {
         String scheme = request.getScheme();
         if (request.getHeader("x-forwarded-proto") != null) {
@@ -560,5 +610,8 @@ public abstract class BaseController {
         auditLogService.logEntityAction(user.getTenantId(), customerId, user.getId(), user.getName(), entityId, entity, actionType, e, additionalInfo);
     }
 
+    public static Exception toException(Throwable error) {
+        return Exception.class.isInstance(error) ? (Exception) error : new Exception(error);
+    }
 
 }

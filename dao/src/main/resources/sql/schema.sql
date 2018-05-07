@@ -118,7 +118,9 @@ CREATE TABLE IF NOT EXISTS device (
     type varchar(255),
     name varchar(255),
     search_text varchar(255),
-    tenant_id varchar(31)
+    tenant_id varchar(31),
+    last_connect bigint,
+    last_update bigint
 );
 
 CREATE TABLE IF NOT EXISTS device_credentials (
@@ -254,4 +256,27 @@ CREATE TABLE IF NOT EXISTS widgets_bundle (
     search_text varchar(255),
     tenant_id varchar(31),
     title varchar(255)
+);
+
+CREATE TABLE IF NOT EXISTS rule_chain (
+    id varchar(31) NOT NULL CONSTRAINT rule_chain_pkey PRIMARY KEY,
+    additional_info varchar,
+    configuration varchar(10000000),
+    name varchar(255),
+    first_rule_node_id varchar(31),
+    root boolean,
+    debug_mode boolean,
+    search_text varchar(255),
+    tenant_id varchar(31)
+);
+
+CREATE TABLE IF NOT EXISTS rule_node (
+    id varchar(31) NOT NULL CONSTRAINT rule_node_pkey PRIMARY KEY,
+    rule_chain_id varchar(31),
+    additional_info varchar,
+    configuration varchar(10000000),
+    type varchar(255),
+    name varchar(255),
+    debug_mode boolean,
+    search_text varchar(255)
 );

@@ -125,6 +125,9 @@ public class BufferedRateLimiter implements AsyncRateLimiter {
                 if(permits.get() < permitsLimit) {
                     reprocessQueue();
                 }
+                if(permits.get() < permitsLimit) {
+                    reprocessQueue();
+                }
                 return lockedFuture.future;
             } catch (InterruptedException e) {
                 return Futures.immediateFailedFuture(new BufferLimitException());

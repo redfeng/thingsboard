@@ -37,7 +37,17 @@ public class DataConstants {
     public static final String ERROR = "ERROR";
     public static final String LC_EVENT = "LC_EVENT";
     public static final String STATS = "STATS";
+    public static final String DEBUG_RULE_NODE = "DEBUG_RULE_NODE";
 
     public static final String ONEWAY = "ONEWAY";
     public static final String TWOWAY = "TWOWAY";
+
+    public static final String IN = "IN";
+    public static final String OUT = "OUT";
+
+    public static final String INACTIVITY_EVENT = "INACTIVITY_EVENT";
+    public static final String CONNECT_EVENT = "CONNECT_EVENT";
+    public static final String DISCONNECT_EVENT = "DISCONNECT_EVENT";
+    public static final String ACTIVITY_EVENT = "ACTIVITY_EVENT";
+
 }
