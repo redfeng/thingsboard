@@ -27,7 +27,7 @@ export default class TbImageMap {
         this.tooltips = [];
 
         this.$containerElement = $containerElement;
-        this.$containerElement.css('background', '#fff');
+       // this.$containerElement.css('background', '#fff');
 
         this.aspect = 0;
         this.width = 0;

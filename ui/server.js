@@ -41,7 +41,7 @@ app.use(historyApiFallback());
 app.use(webpackDevMiddleware(compiler, {noInfo: true, publicPath: config.output.publicPath}));
 app.use(webpackHotMiddleware(compiler));
 
-const root = path.join(__dirname, '/src');
+const root = path.join(__dirname, 'target/generated-resources/public/static');
 
 app.use('/static', express.static(root));
 
@@ -64,7 +64,7 @@ app.all('/api/*', (req, res) => {
 });
 
 app.get('*', function(req, res) {
-    res.sendFile(path.join(__dirname, 'src/index.html'));
+    res.sendFile(path.join(__dirname, 'target/generated-resources/public/index.html'));
 });
 
 server.on('upgrade', (req, socket, head) => {

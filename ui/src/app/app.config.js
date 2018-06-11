@@ -76,7 +76,7 @@ export default function AppConfig($provide,
             $translateProvider.preferredLanguage('en_US');
         }
     } else {
-        $translateProvider.preferredLanguage('en_US');
+        $translateProvider.preferredLanguage('zh_CN');
     }
 
     $httpProvider.interceptors.push('globalInterceptor');

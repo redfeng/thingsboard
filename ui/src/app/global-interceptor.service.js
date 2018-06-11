@@ -22,7 +22,8 @@ export default function GlobalInterceptor($rootScope, $q, $injector) {
     var userService;
     var types;
     var http;
-    var CUSTOMHOST="http://192.168.1.101:8888";
+    var CUSTOMHOST="http://iot.soilless.cn:8080";
+    //var CUSTOMHOST="";
     var internalUrlPrefixes = [
         '/api/auth/token',
         '/api/plugins/rpc'

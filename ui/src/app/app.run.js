@@ -135,7 +135,7 @@ export default function AppRun($rootScope, $window, $injector, $location, $log, 
             }
         })
 
-        $rootScope.pageTitle = '龙安物联';
+        $rootScope.pageTitle = '溢佳物联';
 
         $rootScope.stateChangeSuccessHandle = $rootScope.$on('$stateChangeSuccess', function (evt, to, params) {
             if (userService.isPublic() && to.name === 'home.dashboards.dashboard') {
@@ -144,9 +144,9 @@ export default function AppRun($rootScope, $window, $injector, $location, $log, 
             }
             if (angular.isDefined(to.data.pageTitle)) {
                 $translate(to.data.pageTitle).then(function (translation) {
-                    $rootScope.pageTitle = '龙安物联 | ' + translation;
+                    $rootScope.pageTitle = '溢佳物联 | ' + translation;
                 }, function (translationId) {
-                    $rootScope.pageTitle = '龙安物联 | ' + translationId;
+                    $rootScope.pageTitle = '溢佳物联 | ' + translationId;
                 });
             }
         })

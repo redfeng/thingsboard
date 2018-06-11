@@ -32,7 +32,7 @@ module.exports = {
     ],
     output: {
         path: path.resolve(__dirname, 'target/generated-resources/public/static'),
-        publicPath: '/',
+        publicPath: '/static/',
         filename: 'bundle.js',
     },
     plugins: [
@@ -51,7 +51,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: './src/index.html',
             filename: 'index.html',
-            title: 'ThingsBoard',
+            title: '中科龙安',
             inject: 'body',
         }),
         new webpack.optimize.OccurrenceOrderPlugin(),

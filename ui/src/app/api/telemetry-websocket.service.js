@@ -60,8 +60,8 @@ function TelemetryWebsocketService($rootScope, $websocket, $timeout, $window, ty
         }
         telemetryUri = "ws:";
     }
-    //telemetryUri += "//" + location.hostname + ":" + port;
-    telemetryUri += "//192.168.1.101:8888"
+    // telemetryUri += "//" + location.hostname + ":" + port;
+    telemetryUri += "//iot.soilless.cn:8080"
     telemetryUri += "/api/ws/plugins/telemetry";
 
     var service = {

@@ -24,13 +24,13 @@ const path = require('path');
 module.exports = {
     devtool: 'source-map',
     entry: [
-        './src/app/app.js',
+       './src/app/app.js',
         'webpack-material-design-icons'
     ],
     output: {
         path: path.resolve(__dirname, 'target/generated-resources/public/static'),
-        publicPath: '/static/',
-        filename: 'bundle.[hash].js',
+        publicPath: './static/',
+        filename: 'bundle.[hash].js'
     },
     plugins: [
         new webpack.ProvidePlugin({
@@ -47,7 +47,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: './src/index.html',
             filename: '../index.html',
-            title: '中科龙安',
+            title: 'thingsboard',
             inject: 'body',
         }),
         new webpack.optimize.OccurrenceOrderPlugin(),
@@ -64,6 +64,11 @@ module.exports = {
                 NODE_ENV: JSON.stringify('production'),
             },
         }),
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false
+              }
+            })
     ],
     node: {
         tls: "empty",
